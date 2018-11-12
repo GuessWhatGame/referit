@@ -1,0 +1,9 @@
+[submodule "src/cocoapi"]
+	path = src/cocoapi
+	url = git@github.com:GuessWhatGame/cocoapi.git
+[submodule "src/generic"]
+	path = src/generic
+	url = git@github.com:GuessWhatGame/generic.git
+[submodule "src/neural_toolbox"]
+	path = src/neural_toolbox
+	url = git@github.com:GuessWhatGame/neural_toolbox.git
