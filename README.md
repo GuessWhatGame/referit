@@ -243,11 +243,6 @@ Note that it is easy to implement an extra baseline by changing the type flag
       "image_input": "conv",            # input type (raw/feature/conv)
       "dim": [14, 14, 1024],            # input dimension
       "normalize": false,               # Normalize image by L2 norm
-
-      "attention" : {
-        "mode": "none"                  # apply attention
-      }
-
     },
 
     "crop": {                           # Define the crop setting
@@ -255,11 +250,6 @@ Note that it is easy to implement an extra baseline by changing the type flag
       "dim": [14, 14, 1024],
       "normalize": false,
       "scale" : 1.1,                    # Define the the % crop outside the initial bounding box
-
-      "attention" : {
-        "mode": "none"
-      }
-
     },
 
     "film_block":                       # Define the modulated pipeline
@@ -284,16 +274,16 @@ Note that it is easy to implement an extra baseline by changing the type flag
         "mask" : true,                  # Inject resized mask  
         "conv_out": 512,                # number of channels of the stem
         "conv_kernel": [1,1],           # kernel size of the stem
-
-        "attention" : {                 # Define pooling method at the end
-          "mode": "glimpse",            # mean/max/classic/glimpse(MLB)
-          "no_attention_mlp": 256,      # projection size for MLB 
-          "no_glimpses": 1              # number of glimpse  
-        }
       }
     },
 
-  "dropout_keep_prob" : 1.0             # number of glimpse
+    "pooling" : {                   # Define pooling or attention method at the end
+      "mode": "glimpse",            # mean/max/classic/glimpse(MLB)
+      "no_attention_mlp": 256,      # projection size for MLB 
+      "no_glimpses": 1              # number of glimpse  
+    }
+
+    "dropout_keep_prob" : 1.0             # number of glimpse
 
   },
 
