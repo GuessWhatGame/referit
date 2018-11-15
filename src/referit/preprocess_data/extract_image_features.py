@@ -7,10 +7,12 @@ import argparse
 
 from generic.data_provider.image_loader import RawImageBuilder, RawCropBuilder
 from generic.preprocess_data.extract_img_features import extract_features
+from generic.data_provider.dataset import CropDataset
 
 from neural_toolbox import resnet
 
-from referit.data_provider.referit_dataset import ReferitDataset, CropDataset
+from referit.data_provider.referit_dataset import ReferitDataset
+
 from referit.data_provider.referit_batchifier import ReferitBatchifier
 
 
@@ -73,6 +75,7 @@ elif "crop" in args.mode:
                                   scale=args.crop_scale,
                                   channel=channel_mean)
 
+    dataset_args["dataset_cls"] = ReferitDataset
     dataset_args["expand_objects"] = (args.mode == "crop_all")
     dataset_args["crop_builder"] = crop_builder
 
@@ -93,7 +96,6 @@ extract_features(
     dataset_cstor=dataset_cstor,
     dataset_args=dataset_args,
     batchifier_cstor=ReferitBatchifier,
-    batchifier_args=dict(split_type="no_split"),
     out_dir=args.out_dir,
     set_type=["all"],
     network_ckpt=args.ckpt,

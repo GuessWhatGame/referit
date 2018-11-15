@@ -118,7 +118,7 @@ with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
 
     # Create evaluation tools
     evaluator = Evaluator(sources, scope=network.scope_name, network=network, tokenizer=tokenizer)
-    batchifier = ReferitBatchifier(tokenizer, sources, glove=glove)
+    batchifier = ReferitBatchifier(tokenizer, sources, glove=glove, split_by_objects=True)
 
     # define listener
     listener = ReferitAccuracyListener(require=network.softmax)
@@ -186,7 +186,7 @@ with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
 
     for test_name in test_names:
 
-        test_batchifier = ReferitBatchifier(tokenizer, sources, glove=glove, split_type=test_name)
+        test_batchifier = ReferitBatchifier(tokenizer, sources, glove=glove, split_type=test_name, split_by_objects=True)
         test_iterator = Iterator(testset, pool=cpu_pool,
                                  batch_size=batch_size,
                                  batchifier=test_batchifier,

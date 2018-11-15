@@ -5,21 +5,21 @@ from PIL import Image as PImage
 
 from generic.data_provider.image_preprocessors import get_spatial_feat, resize_image, scaled_crop_and_pad
 from generic.data_provider.nlp_utils import padder, padder_3d
-import time
 
 
 class ReferitBatchifier(object):
 
-    def __init__(self, tokenizer, sources, glove=None, split_type=None):
+    def __init__(self, tokenizer, sources, glove=None, split_type="", split_by_objects=False):
         self.tokenizer = tokenizer
         self.sources = sources
         self.glove = glove
 
         self.split_type = split_type
+        self.split_by_objects = split_by_objects
 
     def filter(self, games):
 
-        # TODO : Move into dataset
+        # TODO : should we move into dataset?
         if self.split_type is not None:
             if self.split_type == "testA":
                 games = [g for g in games if g.object.category == "person"]
@@ -31,25 +31,20 @@ class ReferitBatchifier(object):
 
     def split(self, games):
 
-        # TODO add option to not split dataset (require for image feature extraction)
+        if self.split_by_objects:
+            new_games = []
+            for game in games:
+                for i, obj in enumerate(game.objects):
+                    new_game = copy.copy(game)
+                    new_game.object = obj
+                    new_game.object_id = obj.id
+                    new_game.correct_object = (obj.id == game.object.id)
 
-        if self.split_type == "no_split":
-            return games
+                    new_games.append(new_game)
+            games = new_games
 
-        new_games = []
+        return games
 
-        for game in games:
-            for i, obj in enumerate(game.objects):
-                new_game = copy.copy(game)
-                new_game.object = obj
-                new_game.object_id = obj.id
-                new_game.correct_object = (obj.id == game.object.id)
-
-                new_games.append(new_game)
-
-        return new_games
-
-    #TODO create a source list
     def apply(self, games):
 
         batch = collections.defaultdict(list)
@@ -86,7 +81,7 @@ class ReferitBatchifier(object):
                     batch["crop"] = np.zeros((batch_size,) + crop.shape)
                 batch["crop"][i] = crop
 
-            if 'img_mask' in self.sources:
+            if 'image_mask' in self.sources:
                 assert "image" in batch, "mask input require the image source"
                 mask = game.object.get_mask()
 
@@ -94,7 +89,7 @@ class ReferitBatchifier(object):
                                       batch['image'][-1].shape[0]  # Use the image feature size (not the original img size)
 
                 mask = resize_image(PImage.fromarray(mask), height=ft_height, width=ft_width)
-                batch['img_mask'].append(np.array(mask))
+                batch['image_mask'].append(np.array(mask))
 
             if 'crop_mask' in self.sources:
                 assert "crop" in batch, "mask input require the crop source"
