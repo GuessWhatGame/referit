@@ -12,8 +12,9 @@
 
     "question": {
       "word_embedding_dim": 200,
-      "rnn_state_size": 512,
       "glove" : false,
+      "cell": "gru",
+      "rnn_state_size": 512,
       "bidirectional" : true,
       "layer_norm" : true,
       "max_pool" : false
@@ -21,6 +22,19 @@
 
     "spatial": {
       "no_mlp_units": 30
+    },
+
+    "image": {
+      "image_input": "conv",
+      "dim": [14, 14, 1024],
+      "normalize": false
+    },
+
+    "crop": {
+      "image_input": "conv",
+      "dim": [14, 14, 1024],
+      "normalize": false,
+      "scale" : 1.1
     },
 
     "classifier":
@@ -35,33 +49,13 @@
       "no_mlp_units": 512
     },
 
-    "image": {
-      "image_input": "conv",
-      "dim": [14, 14, 1024],
-      "normalize": false,
-
-        "attention" : {
-          "mode": "glimpse",
-          "no_attention_mlp": 256,
-          "no_glimpses": 1
-        }
-
+    "pooling" : {
+      "mode": "glimpse",
+      "no_attention_mlp": 256,
+      "no_glimpses": 1
     },
 
-    "crop": {
-      "image_input": "conv",
-      "dim": [14, 14, 1024],
-      "normalize": false,
-      "scale" : 1.1,
-
-        "attention" : {
-          "mode": "glimpse",
-          "no_attention_mlp": 256,
-          "no_glimpses": 1
-        }
-    },
-
-  "dropout_keep_prob" : 1.0
+   "dropout_keep_prob" : 1.0
 
   },
 
