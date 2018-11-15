@@ -1,6 +1,5 @@
-from generic.data_provider.dataset import AbstractDataset
 import numpy as np
-import copy
+
 import os
 import re
 
@@ -10,7 +9,7 @@ from referit.data_provider.refer import REFER
 import cocoapi.PythonAPI.pycocotools.mask as cocoapi
 
 
-class Game:
+class Game(object):
 
     def __init__(self, id, image, target_object, objects, sentence):
         self.dialogue_id = id
@@ -34,7 +33,8 @@ class Game:
             obj_id=self.object_id,
             sentence=self.sentence)
 
-class Image:
+
+class Image(object):
     def __init__(self, image_id, width, height, url, filename, image_builder=None):
         self.id = image_id
         self.width = width
@@ -53,7 +53,7 @@ class Image:
             return None
 
 
-class Bbox:
+class Bbox(object):
     def __init__(self, bbox, im_width, im_height):
         # Retrieve features (COCO format)
         self.x_width = bbox[2]
@@ -75,7 +75,7 @@ class Bbox:
             .format(self.x_center, self.y_center, self.x_width, self.y_height)
 
 
-class Object:
+class Object(object):
     def __init__(self, crop_id, category, category_id, bbox, area, segment, crop_builder, image):
         self.id = crop_id
         self.category = category
@@ -120,9 +120,9 @@ class ReferitDataset(AbstractDataset):
             which_set = []
 
         games = []
-        for id in self.refer.getRefIds(split=which_set):
+        for idx in self.refer.getRefIds(split=which_set):
 
-            ref_game = self.refer.loadRefs(id)[0]
+            ref_game = self.refer.loadRefs(idx)[0]
 
             image_id = ref_game["image_id"]
             object_id = ref_game['ann_id']
@@ -172,7 +172,7 @@ class ReferitDataset(AbstractDataset):
             for sentence in ref_game["sentences"]:
                 index_sentence = sentence["sent_id"]
 
-                id_game = (index_sentence+1) * 1000000 + id  # as there is no game_id, we compute one from the sentence_index nd referit index
+                id_game = (index_sentence+1) * 1000000 + idx  # as there is no game_id, we compute one from the sentence_index nd referit index
 
                 game = Game(id_game,
                             image=image,
@@ -189,62 +189,12 @@ class ReferitDataset(AbstractDataset):
         super(ReferitDataset, self).__init__(games)
 
 
-class CropDataset(AbstractDataset):
-    """
-    Each game contains no question/answers but a new object
-    """
-
-    def __init__(self, dataset, expand_objects):
-        old_games = dataset.get_data()
-        new_games = []
-
-        for g in old_games:
-            if expand_objects:
-                new_games += self.split(g)
-            else:
-                new_games += self.update_ref(g)
-
-        super(CropDataset, self).__init__(new_games)
-
-    @classmethod
-    def load(cls, folder, which_set, dataset, split_by, image_builder=None, crop_builder=None, expand_objects=False, games_to_load=float("inf")):
-        return CropDataset(ReferitDataset(folder, which_set, dataset, split_by, image_builder, crop_builder, games_to_load=games_to_load),
-                           expand_objects=expand_objects)
-
-    def split(self, game):
-        games = []
-        for obj in game.objects:
-            new_game = copy.copy(game)
-
-            # select new object
-            new_game.object = obj
-            new_game.object_id = obj.id
-
-            # Hack the image id to differentiate objects
-            new_game.image = copy.copy(game.image)
-            new_game.image.id = obj.id
-
-            games.append(new_game)
-
-        return games
-
-    def update_ref(self, game):
-
-        new_game = copy.copy(game)
-
-        # Hack the image id to differentiate objects
-        new_game.image = copy.copy(game.image)
-        new_game.image.id = game.object_id
-
-        return [new_game]
-
-
 if __name__ == '__main__':
 
     coco1 = ReferitDataset(folder="/media/datas1/dataset/referit/",
-                   which_set="all",
-                   dataset="refcoco",
-                   split_by="unc", image_builder=None, crop_builder=None)
+                           which_set="all",
+                           dataset="refcoco",
+                           split_by="unc", image_builder=None, crop_builder=None)
 
     coco2 = ReferitDataset(folder="/media/datas1/dataset/referit/",
                            which_set="all",
@@ -261,6 +211,3 @@ if __name__ == '__main__':
     img3 = set(g.image.id for g in coco3.games)
 
     print("test")
-
-
-
